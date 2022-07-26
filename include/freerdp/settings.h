@@ -1108,6 +1108,7 @@ struct rdp_settings
 	ALIGN64 char* NtlmSamFile;                 /* 1103 */
 	ALIGN64 BOOL FIPSMode;                     /* 1104 */
 	ALIGN64 UINT32 TlsSecLevel;                /* 1105 */
+	ALIGN64 BOOL EnforceTLSv1_2;
 	UINT64 padding1152[1152 - 1106];           /* 1106 */
 
 	/* Connection Cookie */
