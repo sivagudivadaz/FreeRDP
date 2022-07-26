@@ -152,3 +152,5 @@ packaging/deb/freerdp-nightly/freerdp-nightly-dbg
 # VisualStudio Code
 .vscode
 cache/
+/freerdp-vs-solution/.vs/FreeRDP/v17
+/freerdp-vs-solution/.vs/FreeRDP/FileContentIndex
