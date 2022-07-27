@@ -667,8 +667,18 @@ static BOOL tls_prepare(rdpTls* tls, BIO* underlying, SSL_METHOD* method, int op
 	SSL_CTX_set_options(tls->ctx, options);
 	SSL_CTX_set_read_ahead(tls->ctx, 1);
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
-	SSL_CTX_set_min_proto_version(tls->ctx, TLS1_VERSION); /* min version */
-	SSL_CTX_set_max_proto_version(tls->ctx, 0); /* highest supported version by library */
+	UINT16 version = freerdp_settings_get_uint16(settings, FreeRDP_TLSMinVersion);
+	if (!SSL_CTX_set_min_proto_version(tls->ctx, version))
+	{
+		WLog_ERR(TAG, "SSL_CTX_set_min_proto_version %s failed", version);
+		return FALSE;
+	}
+	version = freerdp_settings_get_uint16(settings, FreeRDP_TLSMaxVersion);
+	if (!SSL_CTX_set_max_proto_version(tls->ctx, version))
+	{
+		WLog_ERR(TAG, "SSL_CTX_set_max_proto_version %s failed", version);
+		return FALSE;
+	}
 #endif
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)
 	SSL_CTX_set_security_level(tls->ctx, settings->TlsSecLevel);
@@ -855,17 +865,8 @@ int tls_connect(rdpTls* tls, BIO* underlying)
 	 * support empty fragments. This needs to be disabled.
 	 */
 	options |= SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
-	/**
-	 * disable SSLv2 and SSLv3
-	 */
-	options |= SSL_OP_NO_SSLv2;
-	options |= SSL_OP_NO_SSLv3;
 
-	if (!tls_prepare(tls, underlying, SSLv23_client_method(), options, TRUE))
-#else
 	if (!tls_prep(tls, underlying, options, TRUE))
-#endif
 		return 0;
 
 #if !defined(OPENSSL_NO_TLSEXT) && !defined(LIBRESSL_VERSION_NUMBER)
@@ -876,14 +877,17 @@ int tls_connect(rdpTls* tls, BIO* underlying)
 
 BOOL tls_prep(rdpTls* tls, BIO* underlying, int options, BOOL clientMode)
 {
-	if (tls->settings->EnforceTLSv1_2)
-	{
-		return tls_prepare(tls, underlying, TLSv1_2_client_method(), options, TRUE);
-	}
-	else
-	{
-		return tls_prepare(tls, underlying, TLS_client_method(), options, TRUE);
-	}
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+	/**
+	 * disable SSLv2 and SSLv3
+	 */
+	options |= SSL_OP_NO_SSLv2;
+	options |= SSL_OP_NO_SSLv3;
+
+	return tls_prepare(tls, underlying, SSLv23_client_method(), options, clientMode));
+#else
+	return tls_prepare(tls, underlying, TLS_client_method(), options, clientMode);
+#endif
 }
 
 #if defined(MICROSOFT_IOS_SNI_BUG) && !defined(OPENSSL_NO_TLSEXT) && \
