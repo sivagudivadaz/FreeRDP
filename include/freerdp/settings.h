@@ -656,6 +656,7 @@ typedef struct _RDPDR_PARALLEL RDPDR_PARALLEL;
 #define FreeRDP_NtlmSamFile (1103)
 #define FreeRDP_FIPSMode (1104)
 #define FreeRDP_TlsSecLevel (1105)
+#define FreeRDP_EnforceTLSv1_2 (1106)
 #define FreeRDP_MstscCookieMode (1152)
 #define FreeRDP_CookieMaxLength (1153)
 #define FreeRDP_PreconnectionId (1154)
