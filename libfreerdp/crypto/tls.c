@@ -878,16 +878,18 @@ int tls_connect(rdpTls* tls, BIO* underlying)
 
 BOOL tls_prep(rdpTls* tls, BIO* underlying, int options, BOOL clientMode)
 {
+	WLog_DBG(TAG, "Preparing TLS");
 #if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
 	/**
 	 * disable SSLv2 and SSLv3
 	 */
 	options |= SSL_OP_NO_SSLv2;
 	options |= SSL_OP_NO_SSLv3;
-
+	WLog_DBG(TAG, "Calling SSLv23_Client_method for TLS");
 	return tls_prepare(tls, underlying, SSLv23_client_method(), options, clientMode);
 #else
-	return tls_prepare(tls, underlying, TLS_client_method(), options, clientMode);
+	WLog_DBG(TAG, "Calling TLS_client_method for TLS");
+	return tls_prepare(tls, underlying, TLSv1_2_client_method(), options, clientMode);
 #endif
 }
 
