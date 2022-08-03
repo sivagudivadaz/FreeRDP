@@ -244,7 +244,7 @@ BOOL nego_security_connect(rdpNego* nego)
 	{
 		if (nego->SelectedProtocol == PROTOCOL_HYBRID)
 		{
-			WLog_DBG(TAG, "nego_security_connect with PROTOCOL_HYBRID");
+			WLog_DBG(TAG, "nego_security_connect with PROTOCOL_HYBRID!!");
 			WLog_DBG(TAG, "Calling transport_connect_nla");
 			nego->SecurityConnected = transport_connect_nla(nego->transport);
 		}
